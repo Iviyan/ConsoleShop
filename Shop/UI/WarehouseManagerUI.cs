@@ -13,7 +13,7 @@ namespace Shop
         ConsoleText Title;
         enum MainMenu
         {
-            [Description("Склады")]
+            [Description("Склад")]
             Warehouses,
             [Description("Сменить пароль")]
             ChangePassword,

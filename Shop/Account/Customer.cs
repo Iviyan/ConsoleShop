@@ -26,7 +26,7 @@ namespace Shop
         }
         public void UI(Settings settings)
         {
-            //new CustomerUI(this, settings);
+            new CustomerUI(this, settings);
         }
     }
 }

@@ -84,8 +84,11 @@ namespace Shop
             while (true)
             {
                 account.Login = ConsoleHelper.Input_ex("Логин: ");
-                if (ValidateLogin(account.Login, out string msg)) break;
-                else Console.WriteLine($"!> {msg}");
+                if (!ValidateLogin(account.Login, out string msg))
+                {
+                    Console.WriteLine($"!> {msg}");
+                    continue;
+                }
 
                 if (settings.FindAccount(account.Login) == null)
                     break;
@@ -284,10 +287,13 @@ namespace Shop
         public static bool ShowAccountEditMenu(Account account, Settings settings, bool asAdmin = false)
         {
             ConsoleSelect menu = new ConsoleSelect(
-                new string[] { "Назад", "Редактировать", "Перевести на другую должность" }
+                (account.Type == AccountType.Admin || account.Type == AccountType.Customer) ?
+                    new string[] { "Назад", "Редактировать" }
+                :
+                    new string[] { "Назад", "Редактировать", "Перевести на другую должность" }
             );
 
-            int startY = menu.ContentHeight + 2;
+            int startY = menu.ContentHeight + 1;
 
             Console.SetCursorPosition(0, startY);
 
@@ -547,6 +553,7 @@ namespace Shop
             [Description("Назад")]
             Back
         }
+        // TODO: просмотр товаров по категории
         static string[] warehouseMenu = EnumHelper.GetArrayFromEnum<WarehouseMenu>();
         enum ProductMenu : byte
         {

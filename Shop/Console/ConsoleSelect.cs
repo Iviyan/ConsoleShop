@@ -219,9 +219,11 @@ namespace Shop
             {
                 Console.SetCursorPosition(StartX + 1, StartY + top + i);
                 bool disable = Disabled.Contains(i);
-                if (disable) Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write(lines[i]);
-                if (disable) Console.ForegroundColor = ConsoleColor.White;
+                if (disable)
+                    using (new UseConsoleColor(ConsoleColor.DarkGray))
+                        Console.Write(lines[i]);
+                else
+                    Console.Write(lines[i]);
             }
             return lines.Length;
         }
@@ -265,20 +267,25 @@ namespace Shop
             }
         }
 
-        public void Disable(int index)
+        public void Disable(int index, bool rewrite = true)
         {
             if (!Disabled.Contains(index))
             {
                 Disabled.Add(index);
-                WriteLine(Choices[index], selHelper[index].top);
+                if (rewrite) WriteLine(Choices[index], selHelper[index].top);
             }
         }
-        public void Enable(int index)
+        public void EnableAll(bool rewrite = true)
+        {
+            Disabled.Clear();
+            if (rewrite) Write();
+        }
+        public void Enable(int index, bool rewrite = true)
         {
             if (Disabled.Contains(index))
             {
                 Disabled.Remove(index);
-                WriteLine(Choices[index], selHelper[index].top);
+                if (rewrite) WriteLine(Choices[index], selHelper[index].top);
             }
         }
 
@@ -287,7 +294,7 @@ namespace Shop
         /// <returns>null -> continue, int -> return int</returns>
         public delegate int? PressKey(ConsoleKeyInfo key, int selectedIndex);
         public static int? AllowEsc(ConsoleKeyInfo key, int selectedIndex) => (key.Key == ConsoleKey.Escape) ? -1 : null;
-        
+
         public int Choice(PressKey onPressKey, bool rewrite = false) => Choice(0, onPressKey, rewrite);
         public int Choice(int selectIndex = 0, PressKey onPressKey = null, bool rewrite = false)
         {

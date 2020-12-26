@@ -20,6 +20,12 @@ namespace Shop
         public const string accounts_UnregisteredFolderName = "Unregistered";
         
         public const string warehousesFolderName = "Warehouses";
+
+        public const string ordersFolderName = "Orders";
+        public const string orders_CompletedFolderName = "Completed orders";
+        public const string orders_CancelledFolderName = "Cancelled orders";
+        
+        public const string chequesFolderName = "Cheques";
         public string AccountsFolderPath { get; }
         public string Accounts_HRFolderPath { get; }
         public string Accounts_WarehouseManagerFolderPath { get; }
@@ -30,10 +36,19 @@ namespace Shop
         public string Accounts_UnregisteredFolderPath { get; }
         public string[] AccountsFoldersList { get; }
         public string WarehousesFolderPath { get; }
+        public string OrdersFolderPath { get; }
+        public string ComletedOrdersFolderPath { get; }
+        public string CancelledOrdersFolderPath { get; }
+        public string ChequesFolderPath { get; }
         public string GetAccountFilePatch(string login, AccountType type) => @$"{GetFolderPathForAccountType(type)}\{login}.dat";
         public string GetDismissedAccountFilePatch(string login) => @$"{Accounts_DismissedFolderPath}\{login}.dat";
         public string GetUnredisteredAccountFilePatch(string login) => @$"{Accounts_UnregisteredFolderPath}\{login}.dat";
         public string GetWarehousePatch(string name) => @$"{WarehousesFolderPath}\{name}";
+        public string GetProductPatch(string warehouseName, string productName) => @$"{WarehousesFolderPath}\{warehouseName}\{productName}.dat";
+        public string GetOrderFilePatch(string name) => @$"{OrdersFolderPath}\{name}.dat";
+        public string GetCompleteOrderFilePatch(string name) => @$"{ComletedOrdersFolderPath}\{name}.dat";
+        public string GetCancelledOrderFilePatch(string name) => @$"{CancelledOrdersFolderPath}\{name}.dat";
+        public string GetChequeFilePatch(string name) => @$"{ChequesFolderPath}\{name}.txt";
         public BinaryReader GetFileReader(string filePath, FileMode fileMode = FileMode.Open) => new BinaryReader(File.Open(filePath, fileMode));
         public BinaryWriter GetFileWriter(string filePath, FileMode fileMode = FileMode.Truncate) => new BinaryWriter(File.Open(filePath, fileMode));
         public BinaryReader GetAccountFileReader(string login, AccountType type, FileMode fileMode = FileMode.Open) => new BinaryReader(File.Open(GetAccountFilePatch(login, type), fileMode));
@@ -69,6 +84,10 @@ namespace Shop
             };
             
             WarehousesFolderPath = $@"{folderName}\{warehousesFolderName}";
+            OrdersFolderPath = $@"{folderName}\{ordersFolderName}";
+            ComletedOrdersFolderPath = $@"{folderName}\{orders_CompletedFolderName}";
+            CancelledOrdersFolderPath = $@"{folderName}\{orders_CancelledFolderName}";
+            ChequesFolderPath = $@"{folderName}\{chequesFolderName}";
 
             if (!Directory.Exists(FolderName)) Directory.CreateDirectory(FolderName);
 
@@ -82,6 +101,10 @@ namespace Shop
                 AddAccount(new Admin(DefaultAdminLogin, DefaultAdminPassword));
             
             if (!Directory.Exists(WarehousesFolderPath)) Directory.CreateDirectory(WarehousesFolderPath);
+            if (!Directory.Exists(OrdersFolderPath)) Directory.CreateDirectory(OrdersFolderPath);
+            if (!Directory.Exists(ComletedOrdersFolderPath)) Directory.CreateDirectory(ComletedOrdersFolderPath);
+
+            if (!Directory.Exists(ChequesFolderPath)) Directory.CreateDirectory(ChequesFolderPath);
 
         }
 
@@ -255,5 +278,28 @@ namespace Shop
             .ToArray();
         public bool WarehouseExists(string name) =>
             Directory.Exists(GetWarehousePatch(name));
+
+        public string[] GetProductsList() =>
+            new SortedSet<string>(
+                Directory.EnumerateFiles(WarehousesFolderPath, "*.dat", SearchOption.AllDirectories)
+                .Select(fn => Helper.ExtractFileNameWithotExtension(fn))
+                ).ToArray();
+
+        public string[] GetOrdersList() =>
+            Directory.EnumerateFiles(OrdersFolderPath, "*.dat").Select(fn => Helper.ExtractFileNameWithotExtension(fn)).ToArray();
+        public void SaveOrder(Order order) =>
+            order.SaveToFile(GetOrderFilePatch(order.Id));
+        public void RemoveOrder(string name) =>
+            Directory.Delete(GetOrderFilePatch(name));
+        public void CompleteOrder(string name) =>
+            Directory.Move(GetOrderFilePatch(name), GetCompleteOrderFilePatch(name));
+        public void CancelOrder(string name) =>
+            Directory.Move(GetOrderFilePatch(name), GetCancelledOrderFilePatch(name));
+
+        public string[] FindProductFilePaths(string name) =>
+            Directory.GetFiles(WarehousesFolderPath, $"{name}.dat", SearchOption.AllDirectories);
+
+        public void WriteCheque(string name, string text) =>
+            File.WriteAllText(GetChequeFilePatch(name), text);
     }
 }

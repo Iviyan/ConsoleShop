@@ -16,7 +16,7 @@ namespace Shop
 
         public void UI(Settings settings)
         {
-            //new CashierUI(this, settings);
+            new CashierUI(this, settings);
         }
     }
 }

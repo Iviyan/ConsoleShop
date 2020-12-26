@@ -28,7 +28,7 @@ namespace Shop
             Products.Add(product.Name);
             product.SaveToFile(GetProductFilePath(product.Name));
         }
-        public void UpdateProducts() => Products = Directory.GetFiles(Path, "*.dat").Select(p => Helper.ExtractFileNameWithotExtension(p)).ToList();
+        public void UpdateProducts() => Products = Directory.EnumerateFiles(Path, "*.dat").Select(p => Helper.ExtractFileNameWithotExtension(p)).ToList();
         public string GetProductFilePath(string name) => $@"{Path}\{name}.dat";
         public Product GetProduct(string name)
             => new Product(GetProductFilePath(name));
@@ -44,6 +44,5 @@ namespace Shop
             File.Move(GetProductFilePath(name), GetProductFilePath(newName));
             return true;
         }
-        //public override void Export(BinaryWriter writer) => base.Export(writer);
     }
 }

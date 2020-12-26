@@ -155,7 +155,7 @@ namespace Shop
                     if (selectedIndex >= 0)
                     {
                         menu.Clear();
-                        ShowAccountMenu(accountsList[selectedIndex], aType);
+                        ShowAccountMenu(menu.Choices[selectedIndex], aType);
                     }
                     else
                         break;

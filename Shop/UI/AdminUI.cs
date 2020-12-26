@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.IO;
-using System.Text.RegularExpressions;
 using static Shop.Account;
 
 namespace Shop
@@ -150,7 +148,7 @@ namespace Shop
                     _ => throw new ArgumentException(),
                 };
 
-                for (int selectedIndex = 0;;)
+                for (int selectedIndex = 0; ;)
                 {
                     Title.Write();
                     accountsList = settings.GetAccountsList(aType);
@@ -173,7 +171,7 @@ namespace Shop
                     if (selectedIndex >= 0)
                     {
                         menu.Clear();
-                        ShowAccountMenu(accountsList[selectedIndex], aType);
+                        ShowAccountMenu(menu.Choices[selectedIndex], aType);
                     }
                     else
                         break;
@@ -233,7 +231,7 @@ namespace Shop
                 {
                     menu.Clear();
                     Title.Clear();
-                    UIFunctions.ShowUnregisteredAccountMenu(unregisteredAccountsList[selectedIndex], settings, true);
+                    UIFunctions.ShowUnregisteredAccountMenu(menu.Choices[selectedIndex], settings, true);
                 }
                 else
                     break;
@@ -273,7 +271,7 @@ namespace Shop
                 {
                     menu.Clear();
                     Title.Clear();
-                    UIFunctions.ShowDismissedAccountMenu(dismissedAccountsList[selectedIndex], settings);
+                    UIFunctions.ShowDismissedAccountMenu(menu.Choices[selectedIndex], settings);
                 }
                 else
                     break;
@@ -402,7 +400,7 @@ namespace Shop
                 {
                     menu.Clear();
                     Title.Clear();
-                    UIFunctions.ShowWarehouseMenu(warehousesList[selectedIndex], settings);
+                    UIFunctions.ShowWarehouseMenu(menu.Choices[selectedIndex], settings);
                 }
                 else
                     break;
@@ -419,8 +417,18 @@ namespace Shop
                 while (true)
                 {
                     warehouseName = ConsoleHelper.Input_ex("Имя склада: ");
-                    if (warehouseName.Length > 0) break;
-                    else Console.WriteLine($"!> Имя склада не может быть пустым");
+                    if (warehouseName.Length == 0)
+                    {
+                        Console.WriteLine($"!> Имя склада не может быть пустым");
+                        continue;
+                    }
+                    if (settings.WarehouseExists(warehouseName))
+                    {
+                        Console.WriteLine($"!> Склад с таким именем уже существует");
+                        continue;
+                    }
+                    break;
+
                 }
 
                 settings.AddWarehouse(warehouseName);
